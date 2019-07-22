@@ -44,6 +44,10 @@ function handlePost(event, done) {
 
   // console.log('parsed body:', JSON.stringify(parsedBody, null, 2));
 
+  if (parsedBody.comment && parsedBody.comment.length) {
+    done(new Error('Honeypot field had nonzero length; bailing.'))
+  }
+
   const name = parsedBody.name || "An Anonymous Hacker";
   const email = parsedBody.email || "fake@protonmail.com";
   const company = parsedBody.company || "US Gov't.";
