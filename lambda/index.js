@@ -15,9 +15,7 @@ exports.handler = (event, context, callback) => {
 
     return callback(null, {
       statusCode: err ? "400" : "200",
-      body: err
-        ? "something went wrong 😭"
-        : succesTemplate(data, "Corvid Security"),
+      body: err ? failureTemplate() : succesTemplate(data, "Corvid Security"),
       headers: {
         "Content-Type": "text/html; charset=utf8"
       }
@@ -45,7 +43,7 @@ function handlePost(event, done) {
   // console.log('parsed body:', JSON.stringify(parsedBody, null, 2));
 
   if (parsedBody.comment && parsedBody.comment.length) {
-    done(new Error('Honeypot field had nonzero length; bailing.'))
+    done(new Error("Honeypot field had nonzero length; bailing."));
   }
 
   const name = parsedBody.name || "An Anonymous Hacker";
@@ -103,10 +101,19 @@ ${phone && `Phone: ${phone}`}
 Message: "${message}"
 `;
 
-const succesTemplate = (data, siteName) =>
+const succesTemplate = data =>
+  pageTemplate(`
+<h4>Thanks for reaching out. We'll be in touch soon. Please save this page for your records:</h4>
+<pre>${JSON.stringify(data, null, 2)}</pre>
+`);
+const failureTemplate = () =>
+  pageTemplate(
+    `<h4>Whoops, something went wrong.</h4><h5>Sorry about that. You can email us directly at derek@corvidsec.com</h5>`
+  );
+const pageTemplate = children =>
   `<html>
         <head>
-        <title>Thanks for visiting ${siteName}</title>
+        <title>Thanks for visiting Corvid Security</title>
         <style>
         body {
           font-family: sans-serif;
@@ -131,8 +138,7 @@ const succesTemplate = (data, siteName) =>
         </style>
         </head>
         <body>
-        <h4>Thanks for reaching out. We'll be in touch soon. Please save this page for your records:</h4>
-        <pre>${JSON.stringify(data, null, 2)}</pre>
+        ${children}
         <footer>
         <a href="https://www.corvidsec.com">Back to the site</a>
         </footer>
