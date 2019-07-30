@@ -56,7 +56,7 @@ function handlePost(event, done) {
   const snsParams = {
     Message: templateMessage({ name, email, company, phone, message }),
     Subject: `[smog] ${name} sent you a message.`,
-    TopicArn: "arn:aws:sns:us-west-2:907905092719:smog"
+    TopicArn: "arn:aws:sns:us-west-2:721348449844:contact-form-submit"
   };
 
   console.log("created snsParams:", JSON.stringify(snsParams, null, 2));
@@ -66,11 +66,12 @@ function handlePost(event, done) {
   sns.publish(snsParams, err => {
     if (err) {
       done(err);
+    } else {
+      console.log("Published to SNS topic.");
     }
-    console.log("Published to SNS topic.");
 
     const dynamoParams = {
-      TableName: "smog",
+      TableName: "contact-form",
       Item: {
         hash: "a",
         createdAt: Date.now(),
@@ -86,6 +87,8 @@ function handlePost(event, done) {
     dynamo.putItem(dynamoParams, err => {
       if (err) {
         done(err);
+      } else {
+        console.log("Wrote to DynamoDB");
       }
 
       done(null, { name, email, company, phone, message });
@@ -93,6 +96,7 @@ function handlePost(event, done) {
   });
 }
 
+/** renders data into a nice string for the SNS message */
 const templateMessage = ({ name, email, company, phone, message }) => `
 Name: ${name}
 Email: ${email}
@@ -101,15 +105,20 @@ ${phone && `Phone: ${phone}`}
 Message: "${message}"
 `;
 
+/** renders a success landing page */
 const succesTemplate = data =>
   pageTemplate(`
 <h4>Thanks for reaching out. We'll be in touch soon. Please save this page for your records:</h4>
 <pre>${JSON.stringify(data, null, 2)}</pre>
 `);
+
+/** renders an error landing page */
 const failureTemplate = () =>
   pageTemplate(
     `<h4>Whoops, something went wrong.</h4><h5>Sorry about that. You can email us directly at derek@corvidsec.com</h5>`
   );
+  
+/** renders html for a 'landing page' to serve in response to form POST request */
 const pageTemplate = children =>
   `<html>
         <head>
