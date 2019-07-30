@@ -1,4 +1,4 @@
-url = "https://pr8sm02tl9.execute-api.us-west-2.amazonaws.com/prod/contactFormSubmit"
-data = "name=Mr.+BoJangles&company=The+Fuzz&email=foo%40beer.com&phone=2020202&message=everywhere+%3A%28"
-#data = "{ \"name\": \"Mr. Vinklevoss\", \"email\":\"boga@gotoassist.com\", \"message\":\"voHiYo\", \"phone\":\"867-5309!!!\", \"company\":\"legends\" }"
+url = "https://21rxpsrcwh.execute-api.us-west-2.amazonaws.com/prod/contactFormSubmit"
+data = "name=Mr.+BoJangles&company=The+Fuzz&email=foo%40beer.com&phone=2020202&message=pongHi+%3A%28"
+#data = "{ \"name\": \"Mr. Vinklevoss\", \"email\":\"boga@gotoassist.com\", \"message\":\"voHiYo\", \"phone\":\"867-5309!!!\", \"company\":\"US Gov't.\" }"
 #header = "x-api-key: vjDFUCTu5i2wUIL0XjrCF7kybDPw7QJ12OtmzomS"

@@ -1,32 +1,32 @@
 Sequence Diagram: 
-http://www.plantuml.com/plantuml/uml/LOxDIaCn48NtynH3zhw02wbYaIxKmkt6vUJ76amoPJ91ylPEyIAzs_CTplbsNKbqr08Kb0MVs8FdqIB9HFTuFE0BQVgXwI0rpJgnKFMH89AIfvxmUJQg385BIK4pjuxBsxBEkGyUWljAkJYmRRnxsAxYFNwoL3o-BoVO4AkkNzPHoUTp4lWB3AstXdhynilGmsd_UeDDuP_valiNM69WOtHj3D-3vCjL77QfnL7BBm00
+http://www.plantuml.com/plantuml/png/LOxFIiSm48Jl-nHBxhw01_afYXH42_NYSVF76aooPRD1ylQcLiHUvnjclajL4cqv0JbbmJksOBaLJzBHtCuJFfA6B-e6Gj6e7HDbwmayALcg0UzxeSpWEANWD7Afk3mlltFcZPlWGwQO38njlBevh-8rlhDad5-MLpYJKNtw-HeTbRYkGU0utz5nEr3rdxWrdJJaVtWe_36ROls0aGnmCjeRpLOdSTl5uHAARpbz0m00
 ```
-      ┌─┐                                                     ,.-^^-._                             ┌─┐    
-      ║"│                                                    |-.____.-|                            ║"│    
-      └┬┘                                                    |        |                            └┬┘    
-      ┌┼┐              |   ,-.                               |        |                            ┌┼┐    
-       │               +--{   )            ┌──────┐          |        |        ┌───┐                │     
-      ┌┴┐              |   `-'             │lambda│          '-.____.-'        │SNS│               ┌┴┐    
-      Bob            API Gateway           └──────┘           Dynamo           └───┘           Your Email 
-       │    form POST     │                   │                 │                │                 │      
-       │─────────────────>│                   │                 │                │                 │      
-       │                  │                   │                 │                │                 │      
-       │                  │     trigger       │                 │                │                 │      
-       │                  │──────────────────>│                 │                │                 │      
-       │                  │                   │                 │                │                 │      
-       │                  │                   │   sdk putItem   │                │                 │      
-       │                  │                   │ ────────────────>                │                 │      
-       │                  │                   │                 │                │                 │      
-       │                  │                   │           sdk publish            │                 │      
-       │                  │                   │ ────────────────────────────────>│                 │      
-       │                  │                   │                 │                │                 │      
-       │                  │                   │                 │                │  subscription   │      
-       │                  │                   │                 │                │────────────────>│      
-      Bob            API Gateway           ┌──────┐           Dynamo           ┌───┐           Your Email 
-      ┌─┐              |   ,-.             │lambda│           ,.-^^-._         │SNS│               ┌─┐    
-      ║"│              +--{   )            └──────┘          |-.____.-|        └───┘               ║"│    
-      └┬┘              |   `-'                               |        |                            └┬┘    
-      ┌┼┐                                                    |        |                            ┌┼┐    
-       │                                                     |        |                             │     
-      ┌┴┐                                                    '-.____.-'                            ┌┴┐    
+┌─┐                                                     ,.-^^-._                             ┌─┐    
+║"│                                                    |-.____.-|                            ║"│    
+└┬┘                                                    |        |                            └┬┘    
+┌┼┐              |   ,-.                               |        |                            ┌┼┐    
+ │               +--{   )            ┌──────┐          |        |        ┌───┐                │     
+┌┴┐              |   `-'             │Lambda│          '-.____.-'        │SNS│               ┌┴┐    
+Bob            API Gateway           └──────┘           Dynamo           └───┘           Your Email 
+ │    form POST     │                   │                 │                │                 │      
+ │─────────────────>│                   │                 │                │                 │      
+ │                  │                   │                 │                │                 │      
+ │                  │     trigger       │                 │                │                 │      
+ │                  │──────────────────>│                 │                │                 │      
+ │                  │                   │                 │                │                 │      
+ │                  │                   │   sdk putItem   │                │                 │      
+ │                  │                   │ ────────────────>                │                 │      
+ │                  │                   │                 │                │                 │      
+ │                  │                   │           sdk publish            │                 │      
+ │                  │                   │ ────────────────────────────────>│                 │      
+ │                  │                   │                 │                │                 │      
+ │                  │                   │                 │                │  subscription   │      
+ │                  │                   │                 │                │────────────────>│      
+Bob            API Gateway           ┌──────┐           Dynamo           ┌───┐           Your Email 
+┌─┐              |   ,-.             │Lambda│           ,.-^^-._         │SNS│               ┌─┐    
+║"│              +--{   )            └──────┘          |-.____.-|        └───┘               ║"│    
+└┬┘              |   `-'                               |        |                            └┬┘    
+┌┼┐                                                    |        |                            ┌┼┐    
+ │                                                     |        |                             │     
+┌┴┐                                                    '-.____.-'                            ┌┴┐    
 ```
