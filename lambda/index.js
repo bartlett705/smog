@@ -40,7 +40,7 @@ function handlePost(event, done) {
     return;
   }
 
-  // console.log('parsed body:', JSON.stringify(parsedBody, null, 2));
+  console.log('parsed body:', JSON.stringify(parsedBody, null, 2));
 
   if (parsedBody.comment && parsedBody.comment.length) {
     done(new Error("Honeypot field had nonzero length; bailing."));
