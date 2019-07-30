@@ -115,7 +115,7 @@ const succesTemplate = data =>
 /** renders an error landing page */
 const failureTemplate = () =>
   pageTemplate(
-    `<h4>Whoops, something went wrong.</h4><h5>Sorry about that. You can email us directly at derek@corvidsec.com</h5>`
+    `<h4>Whoops, something went wrong.</h4><h5>Sorry about that. You can email us directly at contact@corvidsec.com</h5>`
   );
   
 /** renders html for a 'landing page' to serve in response to form POST request */
