@@ -4,11 +4,18 @@
   "description": "publishes form POST requests to sns + dynamo",
   "main": "index.js",
   "scripts": {
-    "test": "jest"
+    "test": "jest",
+    "deploy": "tsc && ./scripts/deploy-ts.sh smog"
   },
   "author": "Ahmad K",
   "license": "ISC",
   "devDependencies": {
     "eslint": "^6.0.1"
+  },
+  "dependencies": {
+    "@types/node": "^13.1.0",
+    "aws-sdk": "^2.596.0",
+    "dynamodb-doc": "^1.0.0",
+    "typescript": "^3.7.4"
   }
 }
