@@ -1,7 +1,7 @@
 {
   "name": "smog",
-  "version": "0.3.0",
-  "description": "publishes form POST requests to discord + dynamo",
+  "version": "1.0.0",
+  "description": "cdk-managed stack that publishes form POST requests to discord + dynamo",
   "bin": {
     "smog-stack": "bin/cdk.js"
   },
