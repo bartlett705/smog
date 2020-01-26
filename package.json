@@ -6,11 +6,11 @@
     "smog-stack": "bin/cdk.js"
   },
   "scripts": {
-    "build": "cd src && tsc",
-    "watch": "cd src && tsc -w",
+    "build": "cd lambda && tsc",
+    "watch": "cd lambda && tsc -w",
     "test": "jest",
     "diff": "cdk diff",
-    "deploy": "cdk deploy"
+    "deploy": "npm run build && cdk deploy"
   },
   "devDependencies": {
     "@aws-cdk/assert": "^1.22.0",

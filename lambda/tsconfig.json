@@ -1,15 +1,15 @@
 {
-    "compilerOptions": {
-      "allowJs": true,
-      "esModuleInterop": true,
-      "noImplicitAny": true,
-      "noImplicitThis": true,
-      "module": "commonjs",
-      "moduleResolution": "node",
-      "outDir": "build",
-      "sourceMap": true,
-      "target": "es6",
-    },
-    "include": ["index.ts"],
-    "exclude": ["node_modules", "**/*.test.ts", "**/*.js", "build"]
+  "compilerOptions": {
+    "allowJs": true,
+    "esModuleInterop": true,
+    "noImplicitAny": true,
+    "noImplicitThis": true,
+    "module": "commonjs",
+    "moduleResolution": "node",
+    "outDir": "build",
+    "sourceMap": true,
+    "target": "es6"
+  },
+  "include": ["index.ts"],
+  "exclude": ["node_modules", "**/*.test.ts", "**/*.js", "build", "cdk.out"]
 }

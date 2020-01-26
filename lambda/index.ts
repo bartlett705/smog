@@ -1,23 +1,28 @@
 'use strict'
+import { Callback, Context, Handler } from 'aws-lambda'
 import AWS from 'aws-sdk'
 const dynamo = new AWS.DynamoDB.DocumentClient()
 import querystring from 'querystring'
+import { Discord } from './discord'
 
-type Done = (err?: Error, cookieStrings?: string[]) => void
+const discord = new Discord(process.env.CHANNEL_ID, process.env.DISCORD_TOKEN, {
+  content: 'Smog Lambda sent a message with no content 🤔'
+})
 
-// tslint:disable-next-line: ban-types
-exports.handler = (event: any, context: any, callback: Function) => {
+const handler: Handler = (event, context: Context, callback: Callback) => {
   // console.log('Received event:', JSON.stringify(event, null, 2));
 
   // Code template courtesy of AWS Tutorials 👍
-  const done: Done = (err) => {
+  const done: Callback = (err, rsvpStatus: boolean) => {
     if (err) {
-      console.error(err)
+      console.error()
+      console.error('exited due to exception:', err)
+      console.log('returning failure template')
     }
 
     return callback(null, {
       statusCode: err ? '400' : '200',
-      body: err ? failureTemplate() : succesTemplate(),
+      body: err ? failureTemplate() : succesTemplate(rsvpStatus),
       headers: {
         'Content-Type': 'text/html; charset=utf8'
       }
@@ -26,23 +31,23 @@ exports.handler = (event: any, context: any, callback: Function) => {
 
   switch (event.httpMethod) {
     default:
-      done(new Error(`Unsupported method "${event.httpMethod}"`))
+      done(new Error(`Unsupported http method "${event.httpMethod}"`))
       break
     case 'POST':
       handlePost(event, done)
   }
 }
 
-function handlePost(event: { body: string }, done: Done) {
+export interface RSVP {
+  comment: string
+  name: string
+  attending: string
+  message: string
+}
+function handlePost(event: { body: string }, done: Callback) {
   console.log('raw body:', event.body)
-  let parsedBody: Partial<{
-    comment: string
-    name: string
-    email: string
-    company: string
-    phone: string
-    message: string
-  }> = {}
+
+  let parsedBody: Partial<RSVP> = {}
   try {
     parsedBody = querystring.parse(event.body)
   } catch (e) {
@@ -53,101 +58,95 @@ function handlePost(event: { body: string }, done: Done) {
   console.log('parsed body:', JSON.stringify(parsedBody, null, 2))
 
   if (parsedBody.comment && parsedBody.comment.length) {
+    // super minimal anti-bot protection
     done(new Error('Honeypot field had nonzero length; bailing.'))
   }
 
-  const name = parsedBody.name || 'An Anonymous Hacker'
-  const email = parsedBody.email || 'fake@protonmail.com'
-  const company = parsedBody.company || "US Gov't."
-  const phone = parsedBody.phone || '867-5309'
-  const message = parsedBody.message || 'pongHi'
+  // assumed to be a select element.
+  const attending = parsedBody.attending === 'true' ? true : false
+  // dynamo gets mad if you insert empty strings, it seems? So, we set some defaults.
+  const name = parsedBody.name || 'An Anonymous Coward'
+  const message = parsedBody.message || 'None.'
 
-  const sns = new AWS.SNS()
-  const snsParams = {
-    Message: templateMessage({ name, email, company, phone, message }),
-    Subject: `[smog] ${name} sent you a message.`,
-    TopicArn: 'arn:aws:sns:us-west-2:721348449844:contact-form-submit'
+  const dynamoParams = {
+    TableName: process.env.TABLE_NAME,
+    Item: {
+      hash: 'a',
+      createdAt: Date.now(),
+      createdAtISO: new Date().toISOString(),
+      name,
+      attending,
+      message
+    }
   }
 
-  console.log('created snsParams:', JSON.stringify(snsParams, null, 2))
-
-  // 'callback hell' :lul:
-  // funny how you get spoiled (by async/await in this case).
-  sns.publish(snsParams, (err) => {
-    if (err) {
-      done(err)
-    } else {
-      console.log('Published to SNS topic.')
-    }
-
-    const dynamoParams = {
-      TableName: 'contact-form',
-      Item: {
-        hash: 'a',
-        createdAt: Date.now(),
-        name,
-        email,
-        company,
-        phone,
-        message
-      }
-    }
-
-    console.log('created dynamoParams:', JSON.stringify(dynamoParams, null, 2))
-    dynamo.put(dynamoParams, (dynamoErr) => {
-      if (dynamoErr) {
-        done(dynamoErr)
-      } else {
-        console.log('Wrote to DynamoDB')
-      }
-
-      done(null)
+  console.log('created dynamoParams:', JSON.stringify(dynamoParams, null, 2))
+  dynamo.put(dynamoParams, (dynamoErr) => {
+    const dataString = templateMessage({
+      name,
+      attending,
+      message
     })
+    if (dynamoErr) {
+      discord.postMessage({
+        content: `Error writing to dynamo! ${dataString}`
+      })
+      done(dynamoErr)
+    } else {
+      console.log('Wrote to DynamoDB')
+      discord.postMessage({ content: `RSVP Received :tada: ${dataString}` })
+    }
+    done(null, attending)
   })
 }
 
-/** renders data into a nice string for the SNS message */
-const templateMessage = ({ name, email, company, phone, message }: { [i: string]: string}) => `
-Name: ${name}
-Email: ${email}
-${company && `Company: ${company}`}
-${phone && `Phone: ${phone}`}
-Message: "${message}"
+/** renders data into a nice string for the discord message */
+const templateMessage = ({
+  name,
+  attending,
+  camping,
+  partySize,
+  message
+}: {
+  [i: string]: string | number | boolean
+}) => `
+**Name**: ${name}
+**Attending?** ${attending ? 'Yes' : 'No'}
+**Message:** "${message}"
 `
 
 /** renders a success landing page */
-const succesTemplate = () =>
-  pageTemplate(`
-<h4>Thanks for reaching out. We'll be in touch soon.</h4>
-`)
+const succesTemplate = (rsvpStatus: boolean) =>
+  pageTemplate(
+    `<h2>🎊 Thanks for RSVPing 🎊</h2>
+      <h4> ${
+        rsvpStatus
+          ? '🎉 See you in the desert! 🎉'
+          : 'We will miss you at the party!'
+      } </h4>`,
+    'https://shindig.mosey.systems'
+  )
 
 /** renders an error landing page */
 const failureTemplate = () =>
   pageTemplate(
-    '<h4>Whoops, something went wrong.</h4><h5>Sorry about that. You can email us directly at contact@corvidsec.com</h5>'
+    "<h4>Whoops, something went wrong.</h4><h5>Sorry about that. Maybe try again? Otherwise I probably bungled something. Email me at <a href=mailto:shindig@mosey.systems>shindig@mosey.systems</a></h5> and we'll get it sorted.",
+    'https://shindig.mosey.systems/contact'
   )
 
 /** renders html for a 'landing page' to serve in response to form POST request */
-const pageTemplate = (children: string) =>
+const pageTemplate = (children: string, returnLink: string) =>
   `<html>
   <head>
-    <title>Thanks for visiting Corvid Security</title>
+    <title>Stance Industries Merger</title>
   <style>
     body {
       font-family: sans-serif;
-      background-color: #0f0f0f;
-      color: white;
+      background-color: #ff6700;
+      color: #713327;
       display: flex;
       flex-direction: column;
       align-items: center;
-    }
-    pre {
-      background-color: 2a2a2a;
-      border: 1px dotted black;
-      border-radius: 0.25rem;
-      padding: 0.5rem;
-      max-width: 50%;
-      margin-left: 1rem;
     }
     footer {
       position: relative;
@@ -158,7 +157,9 @@ const pageTemplate = (children: string) =>
     <body>
       ${children}
       <footer>
-        <a href="https://www.corvidsec.com">Back to the site</a>
+      <a href="${returnLink}">Back to the site</a>
       </footer>
     </body>
   </html>`
+
+export { handler }
